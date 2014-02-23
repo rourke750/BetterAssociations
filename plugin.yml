@@ -1,0 +1,12 @@
+name: BetterAssociations
+main: com.sandislandserv.rourke750.BetterAssociations
+version: .01
+author: Rourke750
+softdepend: [Votifier]
+commands:
+   getalts:
+      description: Get the alts of a player.
+      usage: /<command> <player>
+   associateplayer:
+      description: Associates players with a main player
+      usage: /<command> <player> <players>

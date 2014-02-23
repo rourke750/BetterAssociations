@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="pane" prefHeight="491.0" prefWidth="502.0" snapToPixel="true" styleClass="GuiController" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.sandislandserv.rourke750.Gui.GuiController">
+  <!-- TODO Add Nodes -->
+  <children>
+    <BorderPane layoutY="0.0" prefHeight="493.0" prefWidth="504.0" snapToPixel="true" AnchorPane.leftAnchor="0.0">
+      <center>
+        <SplitPane dividerPositions="0.300796812749004" focusTraversable="true" prefHeight="467.0" prefWidth="504.0">
+          <items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="422.0" prefWidth="106.0">
+              <children>
+                <TextField fx:id="username" layoutX="14.0" layoutY="14.0" prefWidth="101.0" promptText="User Name" />
+                <PasswordField fx:id="password" layoutX="14.0" layoutY="36.0" prefWidth="101.0" promptText="Password" text="" />
+                <TextField fx:id="domain" layoutX="14.0" layoutY="58.0" prefHeight="23.0" prefWidth="101.0" promptText="Domain Name" />
+                <Button fx:id="login" layoutX="14.0" layoutY="81.0" mnemonicParsing="false" onMouseClicked="#Login" prefHeight="22.0" text="Login" />
+              </children>
+            </AnchorPane>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="460.0" prefWidth="273.0">
+              <children>
+                <Label layoutX="136.0" layoutY="8.0" prefHeight="40.0" prefWidth="76.0" text="List of Players" />
+                <TableView fx:id="listofPlayers" layoutX="22.0" layoutY="48.0" prefHeight="384.9999000000025" prefWidth="312.0">
+                  <columns>
+                    <TableColumn editable="false" maxWidth="5000.0" minWidth="10.0" prefWidth="105.0" resizable="false" text="Players" fx:id="columnPlayer" />
+                    <TableColumn editable="false" maxWidth="5000.0" minWidth="10.0" prefWidth="205.0" resizable="false" text="UUIDs" fx:id="columnUUID" />
+                  </columns>
+                </TableView>
+              </children>
+            </AnchorPane>
+          </items>
+        </SplitPane>
+      </center>
+      <top>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="30.000099999997474" prefWidth="504.0">
+          <children>
+            <Label fx:id="badLogin" layoutX="341.0" layoutY="6.0" prefHeight="21.999908447265625" prefWidth="72.0" text="Bad Login" textFill="RED" visible="false" />
+            <MenuBar layoutX="0.0" layoutY="4.0" prefWidth="155.0">
+              <menus>
+                <Menu mnemonicParsing="false" text="Add">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Close" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Remove">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Search">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+          </children>
+        </AnchorPane>
+      </top>
+    </BorderPane>
+  </children>
+</AnchorPane>
