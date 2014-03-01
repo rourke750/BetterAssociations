@@ -27,9 +27,11 @@ public class Login implements Listener{
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
 			@Override
 			public void run(){
-				si.run(player);
 				db.addPlayerIp(player);
 				db.associatePlayer(player);
+				db.addPlayerUUID(player);
+				si.run(player);
+				
 			}
 		});
 	}

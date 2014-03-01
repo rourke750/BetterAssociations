@@ -30,12 +30,14 @@ public class BaseValues {
     private PreparedStatement getAlts;
     private PreparedStatement getLastId;
     private PreparedStatement addIp;
-    private PreparedStatement getIp;
+    private PreparedStatement getUUIDfromIP;
+    private PreparedStatement getIpfromUUID;
     private PreparedStatement isIpThere;
     private PreparedStatement addPlayer;
     private PreparedStatement getUUIDfromPlayer;
     private PreparedStatement getPlayerfromUUID;
     private PreparedStatement getAllPlayers;
+    private PreparedStatement updateAssociate;
     
 	public BaseValues(FileConfiguration config_, BetterAssociations plugin){
 	this.plugin = plugin;
@@ -57,7 +59,6 @@ public class BaseValues {
 				+ "`id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
 				+ "`main_account_uuid` varchar(40) NOT NULL,"
 				+ "`uuid` varchar(40) NOT NULL,"
-				+ "`ip` varchar(40) NOT NULL,"
 				+ "`valid` BOOL DEFAULT 1,"
 				+ "PRIMARY KEY(`id`));");
 		db.execute("CREATE TABLE IF NOT EXISTS `ips` (" +
@@ -74,17 +75,19 @@ public class BaseValues {
 	
 	public void initializeStatements(){
 		addAlt = db.prepareStatement(String.format("INSERT INTO %s "
-				+ "(main_account_uuid, uuid, ip) "
-				+ "VALUES(?, ?, ?)", "associations"));
+				+ "(main_account_uuid, uuid) "
+				+ "VALUES(?, ?)", "associations"));
 		addIp = db.prepareStatement(String.format("INSERT INTO %s "
 				+ "(uuid, ip) "
 				+ "VALUES(?, ?)", "ips"));
-		getAlts = db.prepareStatement(String.format("SELECT uuid, ip FROM %s "
+		getAlts = db.prepareStatement(String.format("SELECT uuid, valid FROM %s "
 				+ "WHERE main_account_uuid=?", "associations"));
 		getLastId = db.prepareStatement(String.format(
     			"SELECT LAST_INSERT_ID() AS id ", "player"));
-		getIp = db.prepareStatement(String.format("SELECT uuid FROM %s "
+		getUUIDfromIP = db.prepareStatement(String.format("SELECT uuid FROM %s "
 				+ "WHERE ip=?", "ips"));
+		getIpfromUUID = db.prepareStatement(String.format("SELECT ip from %s "
+				+ "WHERE uuid=?", "ips"));
 		isIpThere = db.prepareStatement(String.format("SELECT ip, uuid FROM %s" +
 				" WHERE ip=? AND uuid=?", "ips"));
 		addPlayer = db.prepareStatement(String.format("INSERT INTO %s " +
@@ -95,6 +98,8 @@ public class BaseValues {
 		getPlayerfromUUID = db.prepareStatement(String.format("SELECT player FROM %s " +
 				"WHERE uuid=?", "player"));
 		getAllPlayers = db.prepareStatement(String.format("SELECT player, uuid from %s ", "player"));
+		updateAssociate = db.prepareStatement(String.format("UPDATE %s SET valid=? WHERE"
+				+ "main_account_uuid=? AND uuid=?", "associations"));
 	}
 	
 	
@@ -117,14 +122,19 @@ public class BaseValues {
 		
 	}
 	
+	public void reconnectAndSetPreparedStatements() {
+        db.connect();
+        initializeStatements();
+	}
+	
 	public void addPlayerUUID(Player player){
-		if (!db.isConnected()) db.connect(); // reconnects database
+		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
 		String name = player.getName();
 		String uuid = player.getUniqueId().toString();
 		try{
 			getUUIDfromPlayer.setString(1, name);
 			ResultSet data = getUUIDfromPlayer.executeQuery();
-			if (data == null){
+			if (data == null || !data.next()){
 				addPlayer.setString(1, uuid);
 				addPlayer.setString(2, name);
 				addPlayer.execute();
@@ -136,66 +146,73 @@ public class BaseValues {
 	}
 	
 	public void associatePlayer(Player player){
-		if (!db.isConnected()) db.connect(); // reconnects database
-		List<String> players = new ArrayList<String>();
-		List<String> addedAlts = new ArrayList<String>();
+		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
+		List<String> altassociations = new ArrayList<String>();
 		String ip = player.getAddress().getAddress().getHostAddress();
 		String uuid = player.getUniqueId().toString();
 		try { // this code block runs through all the same ips and tries to associate that way
-			getIp.setString(1, ip);
-			ResultSet ips = getIp.executeQuery();
-			while (ips.next()){
-				String ipp = ips.getString("uuid");
-				players.add(ipp); // adds all similar ips to a list
-			}
+			getUUIDfromIP.setString(1, ip); // gets similar ips for the player
+			ResultSet ipset = getUUIDfromIP.executeQuery();
 			getAlts.setString(1, uuid);
-			ResultSet alts = getAlts.executeQuery();
-			while(alts.next()){
-				String account = alts.getString("uuid");
-				addedAlts.add(account);
+			ResultSet altset = getAlts.executeQuery();
+			while (altset.next()){
+				String alt = altset.getString("uuid");
+				altassociations.add(alt);
+				subCatagoryAssociation(uuid, alt);
 			}
-			for(int x = 0; x < players.size(); x++){
-				String y = players.get(x);
-				if(!addedAlts.contains(y)){ // if an account with a similar ip is not on their alt list
+			while (ipset.next()){
+				String alt = ipset.getString("uuid");
+				if (!altassociations.contains(alt)){
 					addAlt.setString(1, uuid);
-					addAlt.setString(2, y);
-					addAlt.setString(3, ip);
+					addAlt.setString(2, alt);
 					addAlt.execute();
-					addedAlts.add(y);
+					subCatagoryAssociation(uuid, alt);
 				}
-				subCatagoryAssociation(uuid, y, players); // adds this players alts to this account's alts
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
 	}
-/*	
-	public void associatePlayer(String main, String alt){
-		if (!db.isConnected()) db.connect(); // reconnects database
-		getUUIDfromPlayer.setString(1, main);
-	}
-	*/
-	
-	public void subCatagoryAssociation(String uuid1, String uuid2, List<String> players){
-		if (!db.isConnected()) db.connect(); // reconnects database
-		List<String> addedAlts = new ArrayList<String>();
-		List<String> addedIps = new ArrayList<String>();
+
+	public void associatePlayer(String main, String alt){ // associates 2 players together
+		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
 		try {
-			getAlts.setString(1, uuid2);
-			ResultSet alts = getAlts.executeQuery();
-			while(alts.next()){ // adds the alt's alts to their alts.
-				String account = alts.getString("uuid");
-				String ip = alts.getString("ip");
-				addedAlts.add(account);
-				addedIps.add(ip);
+			getUUIDfromPlayer.setString(1, main);
+			ResultSet mainUuidset = getUUIDfromPlayer.executeQuery();
+			getUUIDfromPlayer.setString(1, alt);
+			ResultSet altUuidset = getUUIDfromPlayer.executeQuery();
+			String mainUuid = null, altUuid = null;
+			while(mainUuidset.next()) mainUuid = mainUuidset.getString("uuid");
+			while(altUuidset.next()) altUuid = altUuidset.getString("uuid");
+			addAlt.setString(1, mainUuid);
+			addAlt.setString(2, altUuid);
+			addAlt.execute();
+			updateAssociate.setBoolean(1, true);
+			updateAssociate.setString(2, mainUuid);
+			updateAssociate.setString(3, altUuid);
+			updateAssociate.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	private void subCatagoryAssociation(String uuid1, String uuid2){
+		List<String> addedAlts = new ArrayList<String>();
+		try{
+			getAlts.setString(1, uuid1);
+			ResultSet altset = getAlts.executeQuery();
+			while(altset.next()){
+				addedAlts.add(altset.getString("uuid"));
 			}
-			for(int x = 0; x < addedAlts.size(); x++){
-				String y = addedAlts.get(x);
-				String z = addedIps.get(x);
-				if(!players.contains(y)){
+			getAlts.setString(1, uuid2);
+			ResultSet newaltset = getAlts.executeQuery();
+			while(newaltset.next()){
+				String newAlt = newaltset.getString("uuid");
+				if (!addedAlts.contains(newAlt)){
 					addAlt.setString(1, uuid1);
-					addAlt.setString(2, y);
-					addAlt.setString(3, z);
+					addAlt.setString(2, newAlt);
 					addAlt.execute();
 				}
 			}
@@ -205,7 +222,7 @@ public class BaseValues {
 	}
 	
 	public int getLastId(){
-		if (!db.isConnected()) db.connect(); // reconnects database
+		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
 		try {
 			if (getLastId.execute()) {
 				  ResultSet rsKey = getLastId.getResultSet();
@@ -228,7 +245,7 @@ public class BaseValues {
 	 * and uuid to player
 	 */
 	public List<String> getAltsList(String player){
-		if (!db.isConnected()) db.connect(); // reconnects database
+		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
 		try {
 			getUUIDfromPlayer.setString(1, player); // get the uuid from the database. Can't use bukkit because possible offline
 			ResultSet name = getUUIDfromPlayer.executeQuery();
@@ -241,6 +258,8 @@ public class BaseValues {
 			// creates list of the uuids found in the database
 			while (altuuids.next()){
 				String alt = altuuids.getString("uuid");
+				boolean removed = altuuids.getBoolean("valid");
+				if (!removed) continue;
 				uuidaltlist.add(alt);
 			}
 			List<String> altlist = new ArrayList<String>();
@@ -248,7 +267,8 @@ public class BaseValues {
 				getPlayerfromUUID.setString(1, uuidalt);
 				ResultSet playername = getPlayerfromUUID.executeQuery();
 			    while (playername.next()){
-			    	altlist.add(playername.getString("player"));
+			    	String add = playername.getString("player");
+			    	altlist.add(add);
 			    }
 			}
 			return altlist; // return the alts list
@@ -260,6 +280,7 @@ public class BaseValues {
 	}
 	
 	public String getAllPlayers(){
+		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
 		 StringBuilder string = new StringBuilder();
 		 try {
 			ResultSet data = getAllPlayers.executeQuery();
@@ -273,6 +294,26 @@ public class BaseValues {
 			e.printStackTrace();
 		}
 		 return string.toString();
+	}
+	
+	public void disAssociateAltfromPlayer(String player, String alt){
+		try {
+			getUUIDfromPlayer.setString(1, player);
+			ResultSet uuidSet = getUUIDfromPlayer.executeQuery();
+			getUUIDfromPlayer.setString(1, alt);
+			ResultSet altuuidSet = getUUIDfromPlayer.executeQuery();
+			uuidSet.next();
+			altuuidSet.next();
+			String uuidMain = uuidSet.getString("uuid");
+			String uuidAlt = altuuidSet.getString("uuid");
+			updateAssociate.setBoolean(1, false);
+			updateAssociate.setString(2, uuidMain);
+			updateAssociate.setString(3, uuidAlt);
+			updateAssociate.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

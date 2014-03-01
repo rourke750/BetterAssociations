@@ -9,13 +9,13 @@ import com.sandislandserv.rourke750.database.BaseValues;
 
 public class CommandManager implements CommandExecutor{
 
-	private BaseValues db;
 	private getAlts getalts;
 	private associatePlayer associateplayer;
+	private disAssociatePlayer disassociatePlayer;
 	public CommandManager(BaseValues db){
-		this.db = db;
 		getalts = new getAlts(db);
 		associateplayer = new associatePlayer(db);
+		disassociatePlayer = new disAssociatePlayer(db);
 	}
 	
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -23,6 +23,8 @@ public class CommandManager implements CommandExecutor{
 			return getalts.getAltAccounts(sender, args);
 		if (command.getName().equalsIgnoreCase("associateplayer"))
 			return associateplayer.associateplayer(sender, args);
+		if (command.getName().equals("disassociateplayer"))
+			return disassociatePlayer.disAssociate(sender, args);
 		return false;
 	}
 }

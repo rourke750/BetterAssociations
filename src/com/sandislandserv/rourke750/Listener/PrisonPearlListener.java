@@ -18,13 +18,13 @@ public class PrisonPearlListener implements Listener{
 	public PrisonPearlListener(BaseValues bv){
 		this.bv = bv;
 	}
-	/*
+	
 	public void updatePrisonPearlAltList(RequestAltsListEvent event){
 		List<String> players = event.getPlayersToCheck();
 		for (String name: players){ // loop through all the players
-			AltsListEvent altsList = new AltsListEvent();
+			AltsListEvent altsList = new AltsListEvent(bv.getAltsList(name));
 			Bukkit.getServer().getPluginManager().callEvent(altsList);
 		}
 	}
-	*/
+	
 }

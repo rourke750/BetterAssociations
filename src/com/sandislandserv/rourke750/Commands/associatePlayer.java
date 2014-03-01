@@ -34,7 +34,7 @@ public class associatePlayer {
 				sender.sendMessage("Player: " + args[x] + " has never before therefore cannot be added.");
 				continue;
 			}
-			//db.associatePlayer();
+			db.associatePlayer(args[0], args[x]);
 		}
 		sender.sendMessage("All players have been added.");
 		return true;

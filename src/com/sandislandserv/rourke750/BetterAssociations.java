@@ -61,4 +61,7 @@ public class BetterAssociations extends JavaPlugin{
             getCommand(command).setExecutor(com);
         }
 	}
+	public static BaseValues getDataBaseManager(){
+		return database;
+	}
 }

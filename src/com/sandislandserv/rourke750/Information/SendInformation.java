@@ -38,4 +38,8 @@ public class SendInformation {
 		} catch (IOException e) {
 		}
 	}
+	
+	public void getAlts(Player player){
+		
+	}
 }
