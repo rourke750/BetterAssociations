@@ -1,6 +1,14 @@
 package com.sandislandserv.rourke750;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.Map;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -8,6 +16,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sandislandserv.rourke750.Commands.CommandManager;
+import com.sandislandserv.rourke750.Encryption.Encrypt;
+import com.sandislandserv.rourke750.Encryption.EncryptionLoad;
+import com.sandislandserv.rourke750.Encryption.KeyGen;
 import com.sandislandserv.rourke750.Information.AssociationInformation;
 import com.sandislandserv.rourke750.Information.SendInformation;
 import com.sandislandserv.rourke750.Listener.Login;
@@ -19,8 +30,16 @@ public class BetterAssociations extends JavaPlugin{
 	private Login log;
 	private static BaseValues database;
 	private static FileConfiguration config;
+	private static KeyPair pair;
+	private static PublicKey serverkey;
 	
 	public void onEnable(){
+		try {
+			encryption();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		ConfigManager con = new ConfigManager();
 		config = this.getConfig();
 		con.initconfig(config);
@@ -37,6 +56,7 @@ public class BetterAssociations extends JavaPlugin{
 		log = new Login(database, si, this);		
 		enableListener();
 		Command();
+		
 	}
 	
 	public void onDisable(){
@@ -45,7 +65,7 @@ public class BetterAssociations extends JavaPlugin{
 	
 	private void enableListener() {
 		getServer().getPluginManager().registerEvents(log, this);
-		getServer().getPluginManager().registerEvents(new PrisonPearlListener(database), this);
+		//getServer().getPluginManager().registerEvents(new PrisonPearlListener(database), this); not working right now
 	}
 	
 	public static void addPlayerIp(Player player){ // used to add a player's ip
@@ -63,5 +83,25 @@ public class BetterAssociations extends JavaPlugin{
 	}
 	public static BaseValues getDataBaseManager(){
 		return database;
+	}
+	public void encryption() throws Exception{
+		String dir = this.getDataFolder() + File.separator + "Encryption" + File.separator;
+		File publickey = new File(dir + "public.key");
+		File privatekey = new File(dir + "private.key");
+		File directory = new File(dir);
+		File serverkey = new File(dir +"server.key");
+		if (!directory.exists()) directory.mkdir();
+		if (!publickey.exists() || !privatekey.exists() || serverkey.exists()){
+			KeyPair pair = KeyGen.generate(1024);
+			EncryptionLoad.save(directory, pair);
+		}
+			pair = EncryptionLoad.load(directory);
+			this.serverkey = EncryptionLoad.getServerKey(directory);
+	}
+	public static PublicKey getPublicKey(){
+		return pair.getPublic();
+	}
+	public static PublicKey getServerKey(){
+		return serverkey;
 	}
 }

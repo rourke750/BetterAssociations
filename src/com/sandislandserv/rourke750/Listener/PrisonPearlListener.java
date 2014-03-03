@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.server.v1_7_R1.MinecraftEncryption;
 
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import com.sandislandserv.rourke750.database.BaseValues;
@@ -19,6 +20,7 @@ public class PrisonPearlListener implements Listener{
 		this.bv = bv;
 	}
 	
+	@EventHandler
 	public void updatePrisonPearlAltList(RequestAltsListEvent event){
 		List<String> players = event.getPlayersToCheck();
 		for (String name: players){ // loop through all the players

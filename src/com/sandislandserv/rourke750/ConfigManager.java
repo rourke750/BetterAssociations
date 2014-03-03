@@ -21,7 +21,7 @@ public class ConfigManager {
 		
 		if (!config.contains("sql.password")) config.set("sql.password", "");
 		
-		if (!config.contains("send_data")) config.set("send_data", true);
+		if (!config.contains("send_data")) config.set("send_data", false);
 		
 		if (!config.contains("gui_options.username")) config.set("gui_options.username", "");
 		
