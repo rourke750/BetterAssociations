@@ -33,18 +33,6 @@ public class EncryptionLoad {
 		out.write(DatatypeConverter.printBase64Binary(privateSpec.getEncoded())
 				.getBytes());
 		out.close();
-		
-		FileOutputStream outt = new FileOutputStream(directory + "/serverkey.key");
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outt));
-		writer.append("MIGfMA0GCSqGSIb3"
-				+ "DQEBAQUAA4GNADCBiQKBgQCwhh6aLcmiPQjlmu//qOe6yrpZSVsKX4"
-				+ "/617KMXPt20kQNww2lbbuv1Lb2ULH1Qp/9HlJYymak2xXa6IL0Ax8y4"
-				+ "VGXiRJ7kE1vb0lEeQcIEtLgFqUwJStkNGZ0HlcUKYA5Rv6lqmYPyg+F6cfh"
-				+ "4Ne0FcXlcevVv+c7mjIxHU82/QIDAQAB");
-		writer.flush();
-		writer.close();
-		out.close();
-		outt.close();
 	}
 	
 	public static KeyPair load(File directory) throws Exception {
@@ -72,21 +60,5 @@ public class EncryptionLoad {
 				encodedPrivateKey);
 		PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 		return new KeyPair(publicKey, privateKey);
-	}
-	
-	public static PublicKey getServerKey(File directory) throws Exception {
-		File publicKeyFile = new File(directory + "/serverkey.key");
-		FileInputStream in = new FileInputStream(directory + "/serverkey.key");
-		byte[] encodedPublicKey = new byte[(int) publicKeyFile.length()];
-		in.read(encodedPublicKey);
-		encodedPublicKey = DatatypeConverter.parseBase64Binary(new String(
-				encodedPublicKey));
-		in.close();
-		
-		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
-				encodedPublicKey);
-		PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-		return publicKey;
 	}
 }

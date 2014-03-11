@@ -23,8 +23,8 @@ public class getAlts {
 			return true;
 		}
 		List<String> alts = db.getAltsList(args[0]); // get tye alts for the player
-		if (alts == null){
-			sender.sendMessage("Player does not exist, or has not logged on.");
+		if (alts.size() == 0){
+			sender.sendMessage("Player has no alts.");
 			return true;
 		}
 		StringBuilder returnmessage = new StringBuilder();

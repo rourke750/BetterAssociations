@@ -1,12 +1,35 @@
 name: BetterAssociations
 main: com.sandislandserv.rourke750.BetterAssociations
-version: .01
+version: .08
 author: Rourke750
-softdepend: [Votifier]
+softdepend: [PrisonPearl]
 commands:
    getalts:
       description: Get the alts of a player.
       usage: /<command> <player>
+      permission: betterassociations.getalts
    associateplayer:
-      description: Associates players with a main player
+      description: Associates players with a main player.
       usage: /<command> <player> <players>
+      permission: betterassociations.associateplayer
+   disassociateplayer:
+      description: Disassociates a player from the main player.
+      usage: /<command> <player> <players>
+      permissions: betterassociation.disassociateplayer
+permissions:
+   betterassociations.getalts:
+      description: Gives access to the getalts command.
+      default: op
+   betterassociations.associateplayer:
+      description: Gives access to the associateplayer command.
+      default: op
+   betterassociations.disassociate:
+      description: Gives access to the disassociateplayer command.
+      default: op
+   betterassociations.*:
+      description: Gives access to all BetterAssociation commands.
+      default: op
+      children:
+         betterassociations.getalts: true
+         betterassociations.associateplayer: true
+         betterassociations.disassociate: true

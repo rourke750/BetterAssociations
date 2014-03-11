@@ -65,7 +65,8 @@ public class BetterAssociations extends JavaPlugin{
 	
 	private void enableListener() {
 		getServer().getPluginManager().registerEvents(log, this);
-		//getServer().getPluginManager().registerEvents(new PrisonPearlListener(database), this); not working right now
+		if (Bukkit.getPluginManager().getPlugin("PrisonPearl") != null)
+		getServer().getPluginManager().registerEvents(new PrisonPearlListener(database), this);
 	}
 	
 	public static void addPlayerIp(Player player){ // used to add a player's ip
@@ -96,10 +97,9 @@ public class BetterAssociations extends JavaPlugin{
 			EncryptionLoad.save(directory, pair);
 		}
 			pair = EncryptionLoad.load(directory);
-			this.serverkey = EncryptionLoad.getServerKey(directory);
 	}
-	public static PublicKey getPublicKey(){
-		return pair.getPublic();
+	public static KeyPair getKeyPair(){
+		return pair;
 	}
 	public static PublicKey getServerKey(){
 		return serverkey;
