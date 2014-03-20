@@ -32,7 +32,6 @@ public class BaseValues {
     private PreparedStatement addIp;
     private PreparedStatement getUUIDfromIP;
     private PreparedStatement getIpfromUUID;
-    private PreparedStatement isIpThere;
     private PreparedStatement addPlayer;
     private PreparedStatement getUUIDfromPlayer;
     private PreparedStatement getPlayerfromUUID;
@@ -64,15 +63,23 @@ public class BaseValues {
 		db.execute("CREATE TABLE IF NOT EXISTS `ips` (" +
 				"`id` int(40) NOT NULL," +
 				"`ip` varchar(40) NOT NULL," +
-				"PRIMARY KEY(`id`));");
+				"UNIQUE KEY `id_ip_comb` (`id`, `ip`));");
 		db.execute("CREATE TABLE IF NOT EXISTS `player` (" +
 				"`id` int(10) unsigned NOT NULL AUTO_INCREMENT," +
 				"`uuid` varchar(40) NOT NULL," +
 				"`player` varchar(40) NOT NULL," +
-				"PRIMARY KEY(`id`));");
-		//db.execute("CREATE TABLE IF NOT EXISTS `ban` (" +
-		//		"`uuid` varchar(40) NOT NULL," +
-		//		"`reason` )
+				"PRIMARY KEY(`id`) "
+				+ "UNIQUE KEY `uuid_player_combo` (`uuid`, `player`));");
+		db.execute("CREATE TABLE IF NOT EXISTS `ban` (" +
+				"`id` int(10) NOT NULL," +
+				"`reason` varchar(40) NOT NULL);");
+		db.execute("CREATE TABLE IF NOT EXISTS `time` ("
+				+ "`id` int(10) NOT NULL,"
+				+ "`amount` int(10) NOT NULL,"
+				+ "PRIMARY KEY(`id`))");
+		db.execute("CREATE TABLE IF NOT EXISTS `notes` ("
+				+ "`id` int(10) NOT NULL,"
+				+ "`info` varchar(40) NOT NULL);");
 	}
 	
 	public void initializeStatements(){
@@ -103,11 +110,11 @@ public class BaseValues {
 				+ "where TargetIps.ip = ?) c inner join associations ass "
 				+ "on ass.main_account_id = c.id and valid = 1) a where a.alt_id <> ? "
 				+ ";", "associations"));
-		addIp = db.prepareStatement(String.format("INSERT INTO %s "
-				+ "(id, ip) "
-				+ "VALUES(?, ?)", "ips"));
+		addIp = db.prepareStatement(String.format("INSERT IGNORE INTO %s "
+				+ "(id, ip) SELECT "
+				+ "p.id, ? FROM player p WHERE p.uuid=?", "ips"));
 		getAlts = db.prepareStatement(String.format("SELECT p.player, p.uuid "
-				+ "FROM associations ass "
+				+ "FROM %s ass "
 				+ "inner join player p "
 				+ "on p.id = ass.alt_id "
 				+ "WHERE "
@@ -117,9 +124,7 @@ public class BaseValues {
 				+ "WHERE ip=?", "ips"));
 		getIpfromUUID = db.prepareStatement(String.format("SELECT ip from %s "
 				+ "WHERE id=?", "ips"));
-		isIpThere = db.prepareStatement(String.format("SELECT ip FROM %s" +
-				" WHERE id=?", "ips"));
-		addPlayer = db.prepareStatement(String.format("INSERT INTO %s " +
+		addPlayer = db.prepareStatement(String.format("INSERT IGNORE INTO %s " +
 				"(uuid, player) " +
 				"VALUES(?, ?)", "player"));
 		getUUIDfromPlayer = db.prepareStatement(String.format("SELECT uuid, id FROM %s " +
@@ -137,15 +142,11 @@ public class BaseValues {
 	public void addPlayerIp(Player player){
 		if (!db.isConnected()) db.connect(); // reconnects database
 		String ip = player.getAddress().getAddress().getHostAddress();
+		String uuid = player.getUniqueId().toString();
 		try {
-			int id = getId(player.getName());
-			isIpThere.setInt(1, id);
-			ResultSet ips = isIpThere.executeQuery();
-			if (!ips.next() || ips == null){
-				addIp.setInt(1, id);
-				addIp.setString(2, ip);
+				addIp.setString(1, ip);
+				addIp.setString(2, uuid);
 				addIp.execute();
-			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
@@ -162,13 +163,9 @@ public class BaseValues {
 		String name = player.getName();
 		String uuid = player.getUniqueId().toString();
 		try{
-			getUUIDfromPlayer.setString(1, name);
-			ResultSet data = getUUIDfromPlayer.executeQuery();
-			if (data == null || !data.next()){
-				addPlayer.setString(1, uuid);
-				addPlayer.setString(2, name);
-				addPlayer.execute();
-			}
+			addPlayer.setString(1, uuid);
+			addPlayer.setString(2, name);
+			addPlayer.execute();
 		}
 		catch(SQLException e){
 			e.printStackTrace();
@@ -229,12 +226,6 @@ public class BaseValues {
 		//}
 	}
 	
-	/*
-	 * this entire thing is stupid,
-	 * hopefully better support in the future
-	 * to easily allow conversion from player to uuid
-	 * and uuid to player
-	 */
 	public List<String> getAltsList(String player){
 		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
 		List<String> list = new ArrayList<String>();

@@ -7,4 +7,5 @@ public class BanManager implements Listener{
 	public BanManager(){
 		
 	}
+	
 }

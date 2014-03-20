@@ -77,7 +77,7 @@ public class BetterAssociations extends JavaPlugin{
 		database.associatePlayer(player);
 	}
 	public void Command(){
-		CommandManager com = new CommandManager(database);
+		CommandManager com = new CommandManager(database, this);
 		for (String command : getDescription().getCommands().keySet()) {
             getCommand(command).setExecutor(com);
         }
