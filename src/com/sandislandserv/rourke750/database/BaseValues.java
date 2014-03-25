@@ -38,6 +38,7 @@ public class BaseValues {
     private PreparedStatement getAllPlayers;
     private PreparedStatement updateAssociate;
     private PreparedStatement getPlayerfromId;
+    private PreparedStatement manualAddAlt;
     
 	public BaseValues(FileConfiguration config_, BetterAssociations plugin){
 	this.plugin = plugin;
@@ -110,6 +111,14 @@ public class BaseValues {
 				+ "where TargetIps.ip = ?) c inner join associations ass "
 				+ "on ass.main_account_id = c.id and valid = 1) a where a.alt_id <> ? "
 				+ ";", "associations"));
+		manualAddAlt = db.prepareStatement(String.format("INSERT IGNORE INTO %s (main_acount_id, alt_id) "
+				+ "SELECT main.id, alt.id "
+				+ "FROM player main, player alt "
+				+ "WHERE main.player=? AND alt.player=? "
+				+ "UNION "
+				+ "SELECT alt.id, main.id "
+				+ "FROM player main, player alt "
+				+ "WHERE main.player=? AND player.uuid=?", "associations"));
 		addIp = db.prepareStatement(String.format("INSERT IGNORE INTO %s "
 				+ "(id, ip) SELECT "
 				+ "p.id, ? FROM player p WHERE p.uuid=?", "ips"));
@@ -197,33 +206,16 @@ public class BaseValues {
 
 	public void associatePlayer(String main, String alt){ // associates 2 players together
 		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
-		int player1 = getId(main);
-		int player2 = getId(alt);
-	//	try {
-			/*
-			String ip = player.getAddress().getAddress().getHostAddress();
-			int playerid = getId(player.getName());
-			List<Integer> list = getNamesfromIp(ip);
-			if (list == null) return;  // no alts were found
-			for (int id: list){
-				addAlt.setInt(1, playerid);
-				addAlt.setInt(2, id);
-				addAlt.setInt(3, id);
-				addAlt.setInt(4, playerid);
-				addAlt.setInt(5, playerid);
-				addAlt.setInt(6, playerid);
-				addAlt.setInt(7, playerid);
-				addAlt.setInt(8, id);
-				addAlt.setInt(9, id);
-				addAlt.setInt(10, playerid);
-				addAlt.setInt(11, id);
-				addAlt.setInt(12, id);
-				addAlt.execute();
-				*/
-		//} catch (SQLException e) {
-			// TODO Auto-generated catch block
-		//	e.printStackTrace();
-		//}
+		
+		try {
+			manualAddAlt.setString(1, main);
+			manualAddAlt.setString(2, alt);
+			manualAddAlt.setString(3, main);
+			manualAddAlt.setString(4, alt);
+			manualAddAlt.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public List<String> getAltsList(String player){
@@ -305,5 +297,19 @@ public class BaseValues {
 			list.add(id);
 		}
 		return list;
+	}
+	
+	public String getPlayer(String uuid){
+		try {
+			getPlayerfromUUID.setString(1, uuid);
+			ResultSet set = getPlayerfromUUID.executeQuery();
+			if (!set.next() || set == null) return null;
+			String player = set.getString("player");
+			return player;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

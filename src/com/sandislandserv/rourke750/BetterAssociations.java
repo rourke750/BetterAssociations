@@ -21,13 +21,15 @@ import com.sandislandserv.rourke750.Encryption.EncryptionLoad;
 import com.sandislandserv.rourke750.Encryption.KeyGen;
 import com.sandislandserv.rourke750.Information.AssociationInformation;
 import com.sandislandserv.rourke750.Information.SendInformation;
-import com.sandislandserv.rourke750.Listener.Login;
+import com.sandislandserv.rourke750.Listener.LoginManager;
 import com.sandislandserv.rourke750.Listener.PrisonPearlListener;
+import com.sandislandserv.rourke750.Listener.TimeManager;
 import com.sandislandserv.rourke750.database.BaseValues;
 
 public class BetterAssociations extends JavaPlugin{
 
-	private Login log;
+	private TimeManager time;
+	private LoginManager log;
 	private static BaseValues database;
 	private static FileConfiguration config;
 	private static KeyPair pair;
@@ -46,6 +48,7 @@ public class BetterAssociations extends JavaPlugin{
 		saveConfig();
 		database = new BaseValues(this.getConfig(), this);
 		SendInformation si = new SendInformation(database, config);
+		time = new TimeManager(database);
 		final BetterAssociations plugin = this;
 		Bukkit.getScheduler().runTaskAsynchronously(this, new Runnable(){
 			@Override
@@ -53,7 +56,7 @@ public class BetterAssociations extends JavaPlugin{
 		new AssociationInformation(database, config, plugin);
 			}
 		});
-		log = new Login(database, si, this);		
+		new LoginManager(database, this);		
 		enableListener();
 		Command();
 		
@@ -67,6 +70,7 @@ public class BetterAssociations extends JavaPlugin{
 		getServer().getPluginManager().registerEvents(log, this);
 		if (Bukkit.getPluginManager().getPlugin("PrisonPearl") != null)
 		getServer().getPluginManager().registerEvents(new PrisonPearlListener(database), this);
+		getServer().getPluginManager().registerEvents(time, this);
 	}
 	
 	public static void addPlayerIp(Player player){ // used to add a player's ip
