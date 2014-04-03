@@ -47,8 +47,10 @@ public class BetterAssociations extends JavaPlugin{
 		con.initconfig(config);
 		saveConfig();
 		database = new BaseValues(this.getConfig(), this);
-		SendInformation si = new SendInformation(database, config);
-		time = new TimeManager(database);
+		log = new LoginManager(database, this);
+		// disabled sending info while it is still in early alpha
+		//new SendInformation(database, config);
+		time = new TimeManager(this, database);
 		final BetterAssociations plugin = this;
 		Bukkit.getScheduler().runTaskAsynchronously(this, new Runnable(){
 			@Override
@@ -63,7 +65,7 @@ public class BetterAssociations extends JavaPlugin{
 	}
 	
 	public void onDisable(){
-		
+		// save players time here
 	}
 	
 	private void enableListener() {

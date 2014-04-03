@@ -4,11 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+
+import net.minecraft.server.v1_7_R1.MinecraftServer;
+import net.minecraft.util.com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -41,6 +45,7 @@ public class SendInformation {
 			BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out.print("PUBLICKEY");
 			String publickey = input.readLine();
+			
 			PublicKey key = Encrypt.convertToPublicKey(publickey);
 			out.print(Encrypt.encrypt(sb.toString().getBytes(), key));
 			out.flush();
@@ -61,5 +66,31 @@ public class SendInformation {
 	
 	public void getAlts(Player player){
 		
+	}
+	
+	public String getServerId(){
+		try {
+			MinecraftServer server = MinecraftServer.getServer();
+			
+			Field fieldA = MinecraftServer.class.getDeclaredField("S");
+			YggdrasilAuthenticationService service = (YggdrasilAuthenticationService) fieldA.get(server);
+			
+			Field fieldB = YggdrasilAuthenticationService.class.getDeclaredField("clientToken");
+			String token = (String) fieldB.get(service);
+			return token;
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

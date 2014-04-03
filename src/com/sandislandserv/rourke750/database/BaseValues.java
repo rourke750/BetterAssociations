@@ -39,6 +39,10 @@ public class BaseValues {
     private PreparedStatement updateAssociate;
     private PreparedStatement getPlayerfromId;
     private PreparedStatement manualAddAlt;
+    private PreparedStatement insertTime;
+    private PreparedStatement addTime;
+    private PreparedStatement getAmountOfAlts;
+    private PreparedStatement getAmountofTimePlayed;
     
 	public BaseValues(FileConfiguration config_, BetterAssociations plugin){
 	this.plugin = plugin;
@@ -69,15 +73,19 @@ public class BaseValues {
 				"`id` int(10) unsigned NOT NULL AUTO_INCREMENT," +
 				"`uuid` varchar(40) NOT NULL," +
 				"`player` varchar(40) NOT NULL," +
-				"PRIMARY KEY(`id`) "
+				"PRIMARY KEY(`id`), "
 				+ "UNIQUE KEY `uuid_player_combo` (`uuid`, `player`));");
 		db.execute("CREATE TABLE IF NOT EXISTS `ban` (" +
 				"`id` int(10) NOT NULL," +
 				"`reason` varchar(40) NOT NULL);");
 		db.execute("CREATE TABLE IF NOT EXISTS `time` ("
 				+ "`id` int(10) NOT NULL,"
-				+ "`amount` int(10) NOT NULL,"
-				+ "PRIMARY KEY(`id`))");
+				+ "`amount` bigint(10) DEFAULT 0,"
+				+ "PRIMARY KEY(`id`));");
+		db.execute("CREATE TABLE IF NOT EXISTS `play_times` (" +
+				"`id` int(10) NOT NULL," +
+				"`login` varchar(40) NOT NULL," +
+				"`logout` varchar(40) NOT NULL);");
 		db.execute("CREATE TABLE IF NOT EXISTS `notes` ("
 				+ "`id` int(10) NOT NULL,"
 				+ "`info` varchar(40) NOT NULL);");
@@ -128,7 +136,7 @@ public class BaseValues {
 				+ "on p.id = ass.alt_id "
 				+ "WHERE "
 				+ "ass.main_account_id=? AND valid=1 "
-				+ "order by p.player asc ", "associations"));
+				+ "order by p.player asc ", "associations")); // remember rourke to fix this to get the id in the statement
 		getUUIDfromIP = db.prepareStatement(String.format("SELECT id FROM %s "
 				+ "WHERE ip=?", "ips"));
 		getIpfromUUID = db.prepareStatement(String.format("SELECT ip from %s "
@@ -145,6 +153,20 @@ public class BaseValues {
 		getAllPlayers = db.prepareStatement(String.format("SELECT player, uuid from %s ", "player"));
 		updateAssociate = db.prepareStatement(String.format("UPDATE %s SET valid=? WHERE"
 				+ "main_account_id=? AND alt_id=?", "associations"));
+		insertTime = db.prepareStatement(String.format("INSERT IGNORE INTO %s " +
+				"(id) SELECT " +
+				"id FROM player " +
+				"WHERE uuid=?", "time"));
+		addTime = db.prepareStatement(String.format("UPDATE %s SET amount = amount + ? WHERE (" +
+				"SELECT p.id FROM player p WHERE p.uuid=?)", "time"));
+		getAmountOfAlts = db.prepareStatement(String.format("SELECT COUNT(*) AS count FROM %s "
+				+ "WHERE main_account_id="
+				+ "(SELECT p.id FROM player p "
+				+ "WHERE p.uuid=?)", "associations"));
+		getAmountofTimePlayed = db.prepareStatement("SELECT t.amount FROM time t "
+				+ "WHERE t.id="
+				+ "(SELECT p.id FROM player p "
+				+ "WHERE p.player=?)");
 	}
 	
 	
@@ -311,5 +333,52 @@ public class BaseValues {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public void insertIntialPlayerTime(Player player){
+		try {
+			insertTime.setString(1, player.getUniqueId().toString());
+			insertTime.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void addTimetoPlayer(Player player, long time){
+		try {
+			addTime.setLong(1, time);
+			addTime.setString(2, player.getUniqueId().toString());
+			addTime.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public long getPlayerTimeinSeconds(String name){
+		try {
+			getAmountofTimePlayed.setString(1, name);
+			ResultSet set = getAmountofTimePlayed.executeQuery();
+			return set.next() ? set.getLong("t.amount") : -1;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	public int getAmountOfAlts(Player player){
+		String uuid = player.getUniqueId().toString();
+		try {
+			getAmountOfAlts.setString(1, uuid);
+			ResultSet set = getAmountOfAlts.executeQuery();
+			return set.next() ? set.getInt("count") : 0;
+				
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return -1;
 	}
 }

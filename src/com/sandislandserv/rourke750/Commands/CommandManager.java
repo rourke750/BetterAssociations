@@ -14,22 +14,27 @@ public class CommandManager implements CommandExecutor{
 	private associatePlayer associateplayer;
 	private disAssociatePlayer disassociatePlayer;
 	private Utility utl;
+	private getAmountPlayed getPlayed;
+	
 	public CommandManager(BaseValues db, BetterAssociations plugin){
 		getalts = new getAlts(db);
 		associateplayer = new associatePlayer(db);
 		disassociatePlayer = new disAssociatePlayer(db);
 		utl = new Utility(plugin);
+		getPlayed = new getAmountPlayed(db);
 	}
 	
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (command.getName().equalsIgnoreCase("getalts"))
+		if (command.getName().equalsIgnoreCase("bagetalts"))
 			return getalts.getAltAccounts(sender, args);
-		if (command.getName().equalsIgnoreCase("associateplayer"))
+		if (command.getName().equalsIgnoreCase("baassociateplayer"))
 			return associateplayer.associateplayer(sender, args);
-		if (command.getName().equals("disassociateplayer"))
+		if (command.getName().equals("badisassociateplayer"))
 			return disassociatePlayer.disAssociate(sender, args);
 		if (command.getName().equals("betterassociations"))
 			return utl.run(sender, args);
+		if (command.getName().equals("bagetamountplayed"))
+			return getPlayed.getTimePlayed(sender, args);
 		return false;
 	}
 }

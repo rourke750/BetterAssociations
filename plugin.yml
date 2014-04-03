@@ -4,18 +4,26 @@ version: .08
 author: Rourke750
 softdepend: [PrisonPearl]
 commands:
-   getalts:
+   bagetalts:
       description: Get the alts of a player.
       usage: /<command> <player>
       permission: betterassociations.getalts
-   associateplayer:
+   baassociateplayer:
       description: Associates players with a main player.
       usage: /<command> <player> <players>
       permission: betterassociations.associateplayer
-   disassociateplayer:
+   badisassociateplayer:
       description: Disassociates a player from the main player.
       usage: /<command> <player> <players>
       permissions: betterassociation.disassociateplayer
+   betterassociations:
+      description: Main command for betterassociations
+      usage: /<command> <args>
+      permissions: betterassociation.betterassociation
+   bagetamountplayed:
+      description: Command to see how long a player has played for.
+      usage: /<command> <arg>
+      permissions: betterassociation.getamountplayed
 permissions:
    betterassociations.getalts:
       description: Gives access to the getalts command.
@@ -26,6 +34,12 @@ permissions:
    betterassociations.disassociate:
       description: Gives access to the disassociateplayer command.
       default: op
+   betterassociation.betterassociation:
+      description: Gives access to the betterassociatons command.
+      default: op
+   betterassociation.getamountplayed:
+      description: Gives access to the getamountplayed command.
+      default: op
    betterassociations.*:
       description: Gives access to all BetterAssociation commands.
       default: op
@@ -33,3 +47,5 @@ permissions:
          betterassociations.getalts: true
          betterassociations.associateplayer: true
          betterassociations.disassociate: true
+         betterassociations.betterassociations: true
+         betterassociation.getamountplayed: true

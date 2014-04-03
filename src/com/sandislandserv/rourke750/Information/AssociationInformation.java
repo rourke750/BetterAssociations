@@ -12,9 +12,10 @@ import com.sandislandserv.rourke750.database.BaseValues;
 public class AssociationInformation {
 	
 	public AssociationInformation(final BaseValues db, FileConfiguration config_, BetterAssociations plugin){
-		
+		int port = config_.getInt("gui_options.port");
+		if (port == 0) return;
 		try {
-			final ServerSocket socket = new ServerSocket(25549);
+			final ServerSocket socket = new ServerSocket(port);
 						try {
 							while(true){
 								new Info(socket.accept(), db, plugin);
