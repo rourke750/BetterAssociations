@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftHumanEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,7 +41,6 @@ public class LoginManager implements Listener{
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
 			@Override
 			public void run(){
-				db.addPlayerUUID(player);
 				db.addPlayerIp(player);
 				db.associatePlayer(player);
 			}
@@ -48,10 +48,11 @@ public class LoginManager implements Listener{
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void loginEvent(PlayerLoginEvent event){
+	public void loginEvent(PlayerLoginEvent event){ // use AsyncPlayerPreLoginEvent with 1.7.5
 		Player player = event.getPlayer();
 		// set the player display name.  Plugins by now should be running based by uuid
 			// This just helps show every person as who they were when they first logged on
+		db.addPlayerUUID(player);
 			String name = db.getPlayer(player.getUniqueId().toString());
 			if (name == null) return;
 			try {

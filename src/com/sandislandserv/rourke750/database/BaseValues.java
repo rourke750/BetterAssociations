@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -43,6 +45,7 @@ public class BaseValues {
     private PreparedStatement addTime;
     private PreparedStatement getAmountOfAlts;
     private PreparedStatement getAmountofTimePlayed;
+    private PreparedStatement getPlayerBanReason;
     
 	public BaseValues(FileConfiguration config_, BetterAssociations plugin){
 	this.plugin = plugin;
@@ -119,14 +122,14 @@ public class BaseValues {
 				+ "where TargetIps.ip = ?) c inner join associations ass "
 				+ "on ass.main_account_id = c.id and valid = 1) a where a.alt_id <> ? "
 				+ ";", "associations"));
-		manualAddAlt = db.prepareStatement(String.format("INSERT IGNORE INTO %s (main_acount_id, alt_id) "
+		manualAddAlt = db.prepareStatement(String.format("INSERT IGNORE INTO %s (main_account_id, alt_id) "
 				+ "SELECT main.id, alt.id "
 				+ "FROM player main, player alt "
 				+ "WHERE main.player=? AND alt.player=? "
 				+ "UNION "
 				+ "SELECT alt.id, main.id "
 				+ "FROM player main, player alt "
-				+ "WHERE main.player=? AND player.uuid=?", "associations"));
+				+ "WHERE main.player=? AND alt.uuid=?", "associations"));
 		addIp = db.prepareStatement(String.format("INSERT IGNORE INTO %s "
 				+ "(id, ip) SELECT "
 				+ "p.id, ? FROM player p WHERE p.uuid=?", "ips"));
@@ -135,7 +138,10 @@ public class BaseValues {
 				+ "inner join player p "
 				+ "on p.id = ass.alt_id "
 				+ "WHERE "
-				+ "ass.main_account_id=? AND valid=1 "
+				+ "ass.main_account_id=("
+				+ "SELECT pp.id FROM player pp WHERE pp.player=?"
+				+ ")"
+				+ " AND valid=1 "
 				+ "order by p.player asc ", "associations")); // remember rourke to fix this to get the id in the statement
 		getUUIDfromIP = db.prepareStatement(String.format("SELECT id FROM %s "
 				+ "WHERE ip=?", "ips"));
@@ -151,13 +157,13 @@ public class BaseValues {
 		getPlayerfromId = db.prepareStatement(String.format("SELECT player FROM %s "
 				+ "WHERE id=?", "player"));
 		getAllPlayers = db.prepareStatement(String.format("SELECT player, uuid from %s ", "player"));
-		updateAssociate = db.prepareStatement(String.format("UPDATE %s SET valid=? WHERE"
+		updateAssociate = db.prepareStatement(String.format("UPDATE %s SET valid=? WHERE "
 				+ "main_account_id=? AND alt_id=?", "associations"));
 		insertTime = db.prepareStatement(String.format("INSERT IGNORE INTO %s " +
 				"(id) SELECT " +
 				"id FROM player " +
 				"WHERE uuid=?", "time"));
-		addTime = db.prepareStatement(String.format("UPDATE %s SET amount = amount + ? WHERE (" +
+		addTime = db.prepareStatement(String.format("UPDATE %s SET amount = amount + ? WHERE id = (" +
 				"SELECT p.id FROM player p WHERE p.uuid=?)", "time"));
 		getAmountOfAlts = db.prepareStatement(String.format("SELECT COUNT(*) AS count FROM %s "
 				+ "WHERE main_account_id="
@@ -167,6 +173,10 @@ public class BaseValues {
 				+ "WHERE t.id="
 				+ "(SELECT p.id FROM player p "
 				+ "WHERE p.player=?)");
+		getPlayerBanReason = db.prepareStatement("SELECT reason FROM ban"
+				+ "WHERE id=("
+				+ "SELECT p.id FROM player p "
+				+ "WHERE uuid=?)");
 	}
 	
 	
@@ -243,9 +253,8 @@ public class BaseValues {
 	public List<String> getAltsList(String player){
 		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
 		List<String> list = new ArrayList<String>();
-		int id = getId(player);
 		try {
-			getAlts.setInt(1, id);
+			getAlts.setString(1, player);
 			ResultSet set = getAlts.executeQuery();
 			while (set.next()){
 				String alt = set.getString("player");
@@ -380,5 +389,17 @@ public class BaseValues {
 			e.printStackTrace();
 		}
 		return -1;
+	}
+	
+	public String isBanned(String uuid){
+		try {
+			getPlayerBanReason.setString(1, uuid);
+			ResultSet set = getPlayerBanReason.executeQuery();
+			return set.next() ? set.getString("reason") : null;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
