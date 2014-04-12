@@ -1,6 +1,6 @@
 name: BetterAssociations
 main: com.sandislandserv.rourke750.BetterAssociations
-version: .08
+version: .11
 author: Rourke750
 softdepend: [PrisonPearl]
 commands:
