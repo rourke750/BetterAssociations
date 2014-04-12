@@ -5,11 +5,15 @@
   <artifactId>BetterAssociations</artifactId>
   <version>0.11</version>
   
+  <properties>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <repositories>
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public/</url>
-        </repository>
+        </repository>  
     </repositories>
     
     <dependencies>
@@ -20,5 +24,20 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
+		<dependency>
+   			<groupId>com.untamedears.PrisonPearl</groupId>
+   			<artifactId>PrisonPearl</artifactId>
+   			<version>1.7.0</version>
+   			<scope>system</scope>
+   			<systemPath>/home/Rourke750/dependencies/PrisonPearl.jar</systemPath>
+    	</dependency>        
+    	<dependency>
+    		<groupId>com.spigot</groupId>
+    		<artifactId>Spigot</artifactId>
+    		<version>1.7.2</version>
+    		<scope>system</scope>
+    		<systemPath>/home/Rourke750/dependencies/spigot.jar</systemPath>
+    	</dependency>
     </dependencies>
+
 </project>
