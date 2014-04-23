@@ -42,13 +42,13 @@
     
     	<build>
 <defaultGoal>clean package install</defaultGoal>
-<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+<sourceDirectory>${basedir}/java</sourceDirectory>
 
 <resources>
 <resource>
 <targetPath>.</targetPath>
 <filtering>true</filtering>
-<directory>${basedir}/src/main/java></directory>
+<directory>${basedir}/java></directory>
 <includes>
 <include>plugin.yml</include>
 </includes>
