@@ -54,5 +54,4 @@
 </includes>
 </resource>
 </resources>
-<directory>${basedir}</directory>
 </project>
