@@ -39,5 +39,20 @@
     		<systemPath>/home/Rourke750/dependencies/spigot.jar</systemPath>
     	</dependency>
     </dependencies>
+    
+    	<build>
+<defaultGoal>clean package install</defaultGoal>
+<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+
+<resources>
+<resource>
+<targetPath>.</targetPath>
+<filtering>true</filtering>
+<directory>${basedir}/src/main/resources</directory>
+<includes>
+<include>plugin.yml</include>
+</includes>
+</resource>
+</resources>
 
 </project>
