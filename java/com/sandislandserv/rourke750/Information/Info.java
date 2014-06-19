@@ -13,6 +13,9 @@ import com.sandislandserv.rourke750.database.BaseValues;
 
 public class Info {
 
+	/*
+	 * Currently disabled
+	 */
 	private Socket socket;
 	private BaseValues db;
 	

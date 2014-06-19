@@ -1,7 +1,8 @@
 name: BetterAssociations
 main: com.sandislandserv.rourke750.BetterAssociations
-version: .11
+version: .5
 author: Rourke750
+depend: [ProtocolLib]
 softdepend: [PrisonPearl]
 commands:
    bagetalts:
@@ -15,15 +16,15 @@ commands:
    badisassociateplayer:
       description: Disassociates a player from the main player.
       usage: /<command> <player> <players>
-      permissions: betterassociation.disassociateplayer
+      permissions: betterassociations.disassociateplayer
    betterassociations:
       description: Main command for betterassociations
       usage: /<command> <args>
-      permissions: betterassociation.betterassociation
+      permissions: betterassociations.betterassociation
    bagetamountplayed:
       description: Command to see how long a player has played for.
       usage: /<command> <arg>
-      permissions: betterassociation.getamountplayed
+      permissions: betterassociations.getamountplayed
 permissions:
    betterassociations.getalts:
       description: Gives access to the getalts command.
@@ -34,10 +35,10 @@ permissions:
    betterassociations.disassociate:
       description: Gives access to the disassociateplayer command.
       default: op
-   betterassociation.betterassociation:
+   betterassociations.betterassociation:
       description: Gives access to the betterassociatons command.
       default: op
-   betterassociation.getamountplayed:
+   betterassociations.getamountplayed:
       description: Gives access to the getamountplayed command.
       default: op
    betterassociations.*:
@@ -48,4 +49,4 @@ permissions:
          betterassociations.associateplayer: true
          betterassociations.disassociate: true
          betterassociations.betterassociations: true
-         betterassociation.getamountplayed: true
+         betterassociations.getamountplayed: true

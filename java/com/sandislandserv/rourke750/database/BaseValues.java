@@ -59,7 +59,37 @@ public class BaseValues {
 		if (connected){
 			genTables();
 			initializeStatements();
+			initializeProcedure();
 		}
+	}
+	
+	public void initializeProcedure(){
+		db.execute("drop procedure if exists addplayertotable");
+		db.execute("create definer=current_user procedure addplayertotable("
+				+ "in pl varchar(40), in uu varchar(40)) sql security invoker begin "
+				+ ""
+				+ "declare amount int(10);"
+				+ "declare account varchar(40);"
+				+ "declare nameamount int(10);"
+				+ ""
+				+ "set amount=0;"
+				+ "set amount=(select count(*) from player p where p.uuid=uu);"
+				+ ""
+				+ "if (amount < 1) then"
+				+ "		set account =(select uuid from player p where p.player=pl);"
+				+ "		if (account not like uu) then"
+				+ "			insert ignore into playercountnames (player, amount) values (pl, 0);"
+				+ ""
+				+ "			update playercountnames set amount = amount+1 where player=pl;"
+				+ ""
+				+ "			set nameamount=(select amount from playercountnames where player=pl);"
+				+ ""
+				+ "			insert into player (player, uuid) values ((select concat (pl,nameamount)), uu);"
+				+ "		else"
+				+ "			insert ignore into player (player, uuid) values (pl, uu);"
+				+ "		end if;"
+				+ "end if;"
+				+ "end");
 	}
 	
 	public void genTables(){
@@ -92,6 +122,10 @@ public class BaseValues {
 		db.execute("CREATE TABLE IF NOT EXISTS `notes` ("
 				+ "`id` int(10) NOT NULL,"
 				+ "`info` varchar(40) NOT NULL);");
+		db.execute("create table if not exists playercountnames ("
+				+ "player varchar(40) not null,"
+				+ "amount int(10) not null,"
+				+ "primary key (player));");
 	}
 	
 	public void initializeStatements(){
@@ -147,9 +181,7 @@ public class BaseValues {
 				+ "WHERE ip=?", "ips"));
 		getIpfromUUID = db.prepareStatement(String.format("SELECT ip from %s "
 				+ "WHERE id=?", "ips"));
-		addPlayer = db.prepareStatement(String.format("INSERT IGNORE INTO %s " +
-				"(uuid, player) " +
-				"VALUES(?, ?)", "player"));
+		addPlayer = db.prepareStatement("call addplayertotable(?, ?)");
 		getUUIDfromPlayer = db.prepareStatement(String.format("SELECT uuid, id FROM %s " +
 				"WHERE player=?", "player"));
 		getPlayerfromUUID = db.prepareStatement(String.format("SELECT player FROM %s " +
@@ -168,7 +200,7 @@ public class BaseValues {
 		getAmountOfAlts = db.prepareStatement(String.format("SELECT COUNT(*) AS count FROM %s "
 				+ "WHERE main_account_id="
 				+ "(SELECT p.id FROM player p "
-				+ "WHERE p.uuid=?)", "associations"));
+				+ "WHERE p.uuid=? and valid=1)", "associations"));
 		getAmountofTimePlayed = db.prepareStatement("SELECT t.amount FROM time t "
 				+ "WHERE t.id="
 				+ "(SELECT p.id FROM player p "
@@ -199,17 +231,17 @@ public class BaseValues {
         initializeStatements();
 	}
 	
-	public void addPlayerUUID(Player player){
+	public boolean addPlayerUUID(String name, String uuid){
 		if (!db.isConnected()) reconnectAndSetPreparedStatements(); // reconnects database
-		String name = player.getName();
-		String uuid = player.getUniqueId().toString();
 		try{
-			addPlayer.setString(1, uuid);
-			addPlayer.setString(2, name);
+			addPlayer.setString(1, name);
+			addPlayer.setString(2, uuid);
 			addPlayer.execute();
+			return true;
 		}
 		catch(SQLException e){
 			e.printStackTrace();
+			return false;
 		}
 	}
 	
@@ -292,6 +324,10 @@ public class BaseValues {
 			updateAssociate.setInt(1, 0);
 			updateAssociate.setInt(2, id);
 			updateAssociate.setInt(3, altid);
+			updateAssociate.execute();
+			updateAssociate.setInt(1, 0);
+			updateAssociate.setInt(2, altid);
+			updateAssociate.setInt(3, id);
 			updateAssociate.execute();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

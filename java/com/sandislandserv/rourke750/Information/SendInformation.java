@@ -1,96 +1,100 @@
 package com.sandislandserv.rourke750.Information;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
+import java.util.Map;
 
-import net.minecraft.server.v1_7_R1.MinecraftServer;
-import net.minecraft.util.com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
-import org.bukkit.Bukkit;
+import net.minecraft.util.com.mojang.authlib.GameProfile;
+
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import com.sandislandserv.rourke750.BetterAssociations;
-import com.sandislandserv.rourke750.Encryption.Encrypt;
 import com.sandislandserv.rourke750.database.BaseValues;
 
 public class SendInformation {
 
 	private BaseValues bv;
 	private FileConfiguration config_;
-	public SendInformation(BaseValues bv, FileConfiguration config_){
+	private String serialInfo = "";
+	private boolean authenticated = false;
+	private static Map<Player, String> keys = new HashMap<Player, String>();
+
+	public SendInformation(BaseValues bv, FileConfiguration config_) {
 		this.bv = bv;
 		this.config_ = config_;
+		new HandleWebCommincations(); // starts the web handler
+		serialInfo = config_.getString("secret");
+		authenticateServer();
 	}
-	
-	public void run(Player player){
-		if (!config_.getBoolean("send_data")) return; // if config option is false, data is not sent back to host server
-		StringBuilder sb = new StringBuilder();
-		sb.append(player.getAddress().getAddress().getHostAddress());
-		sb.append(" ");
-		sb.append(player.getName());
-		sb.append(" ");
-		sb.append(player.getUniqueId());
+
+	public void run(Player player, GameProfile profile) {
+		if (!authenticated) // server was not authenticated
+			return;
 		try {
-			Socket socket = new Socket("share.betterassociations.com", 25500);
+			SSLSocketFactory socketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+			SSLSocket socket = (SSLSocket) socketFactory.createSocket("share.betterassociations.com", 25500);
+			socket.setEnabledProtocols(new String[] { "TLSv1" });
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-			BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			out.print("PUBLICKEY");
-			String publickey = input.readLine();
-			
-			PublicKey key = Encrypt.convertToPublicKey(publickey);
-			out.print(Encrypt.encrypt(sb.toString().getBytes(), key));
-			out.flush();
+			BufferedReader input = new BufferedReader(new InputStreamReader(
+					socket.getInputStream()));
+			out.println("SEND");
+			out.println("PLAYER_INFO");
+			out.println("UUID");
+			out.println(player.getUniqueId().toString()); // sends the player uuid
+			out.println("NAME");
+			out.println(player.getName().toString()); // sends the player name
+			out.println("IP");
+			out.println(player.getAddress().getAddress()
+					.getHostAddress());
 			socket.close();
 		} catch (UnknownHostException e) {
 		} catch (IOException e) {
-		} catch (InvalidKeySpecException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	public void getAlts(Player player){
-		
-	}
-	
-	public String getServerId(){
+
+	public void authenticateServer() {
 		try {
-			MinecraftServer server = MinecraftServer.getServer();
-			
-			Field fieldA = MinecraftServer.class.getDeclaredField("S");
-			YggdrasilAuthenticationService service = (YggdrasilAuthenticationService) fieldA.get(server);
-			
-			Field fieldB = YggdrasilAuthenticationService.class.getDeclaredField("clientToken");
-			String token = (String) fieldB.get(service);
-			return token;
-		} catch (SecurityException e) {
+			SSLSocketFactory socketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+			SSLSocket socket = (SSLSocket) socketFactory.createSocket("share.betterassociations.com", 25500);
+			socket.setEnabledProtocols(new String[] { "TLSv1" });
+			PrintStream out = new PrintStream(socket.getOutputStream(), true,
+					"UTF-8");
+			BufferedReader input = new BufferedReader(new InputStreamReader(
+					socket.getInputStream(), "UTF-8"));
+			out.println("CHECK");
+			// First thing we need to do is authenticate this server
+			out.println("it worked");
+			if (input.readLine().equals("AUTHENTICATED"))
+				authenticated = true;
+			socket.close();
+		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
 	}
+
 }

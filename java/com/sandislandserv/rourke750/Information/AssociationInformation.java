@@ -9,6 +9,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import com.sandislandserv.rourke750.BetterAssociations;
 import com.sandislandserv.rourke750.database.BaseValues;
 
+/*
+ * Currently disabled
+ */
 public class AssociationInformation {
 	
 	public AssociationInformation(final BaseValues db, FileConfiguration config_, BetterAssociations plugin){

@@ -2,8 +2,6 @@ package com.sandislandserv.rourke750.Listener;
 
 import java.util.List;
 
-import net.minecraft.server.v1_7_R1.MinecraftEncryption;
-
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
