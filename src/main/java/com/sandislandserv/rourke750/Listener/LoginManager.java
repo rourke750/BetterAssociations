@@ -27,45 +27,56 @@ import org.bukkit.event.player.PlayerLoginEvent;
 
 import com.sandislandserv.rourke750.BetterAssociations;
 import com.sandislandserv.rourke750.Information.SendInformation;
+import com.sandislandserv.rourke750.database.AssociationsManager;
 import com.sandislandserv.rourke750.database.BaseValues;
+import com.sandislandserv.rourke750.database.PlayerManager;
 
 public class LoginManager implements Listener {
 
-	private BaseValues db;
+	private PlayerManager pm;
+	private AssociationsManager am;
 	private BetterAssociations plugin;
 
-	public LoginManager(BaseValues db, BetterAssociations plugin, SendInformation si) {
-		this.db = db;
+	public LoginManager(BaseValues db, BetterAssociations plugin,
+			SendInformation si) {
+		pm = db.getPlayerManager();
+		am = db.getAssociationsManager();
 		this.plugin = plugin;
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void joinEvent(PlayerJoinEvent event) {
-		final Player player = event.getPlayer();
-		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-			@Override
-			public void run() {
-				db.addPlayerIp(player);
-				db.associatePlayer(player);
-			}
-		});
-	}
-
+	/*
+	 * Adds player name to database. If name already exists adds an incremental
+	 * number to their name to differentiate between the players. Don't be
+	 * stupid, don't change your name unless you have never played on the
+	 * server.
+	 * 
+	 * Also adds the ip
+	 */
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void preLoginEvent(AsyncPlayerPreLoginEvent event) {
 		String name = event.getName();
 		String uuid = event.getUniqueId().toString();
-		db.addPlayerUUID(name, uuid);
+		pm.addPlayerUUID(name, uuid);
+		pm.addPlayerIp(uuid,
+				event.getAddress().getHostAddress());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void loginEvent(PlayerLoginEvent event) {
+		// associates the player
+		final Player player = event.getPlayer();
+		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+			@Override
+			public void run() {
+				am.associatePlayer(player);
+			}
+		});
 		// set the player display name. Plugins by now should be running based
 		// by uuid
 		// This just helps show every person as who they were when they first
 		// logged on
-		Player player = event.getPlayer();
-		String name = db.getPlayer(player.getUniqueId().toString());
+		String name = pm.getPlayer(
+				player.getUniqueId().toString());
 		try {
 			// start of getting the GameProfile
 			CraftHumanEntity craftHuman = (CraftHumanEntity) player;
@@ -125,10 +136,13 @@ public class LoginManager implements Listener {
 		}
 	}
 
+	/*
+	 * Handles alerts to Admins
+	 */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void sendAdminMessages(PlayerJoinEvent event) {
 		Player playerLogger = event.getPlayer();
-		int amount = db.getAmountOfAlts(playerLogger);
+		int amount = am.getAmountOfAlts(playerLogger);
 		if (amount == 0)
 			return;
 		Set<OfflinePlayer> admins = Bukkit.getOperators();

@@ -60,6 +60,6 @@ public class Info {
 	}
 	
 	public String getAllPlayers(){
-		return db.getAllPlayers();
+		return db.getPlayerManager().getAllPlayers();
 	}
 }

@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.avaje.ebeaninternal.server.lib.sql.DataSourceException;
-public class DataBase {
+class DataBase {
 	private String host;
     private int port;
     private String db;

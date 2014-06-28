@@ -14,27 +14,31 @@ public class CommandManager implements CommandExecutor{
 	private associatePlayer associateplayer;
 	private disAssociatePlayer disassociatePlayer;
 	private Utility utl;
-	private getAmountPlayed getPlayed;
+	private HelpManager helpManager;
+	private BanCommand banCommand;
 	
 	public CommandManager(BaseValues db, BetterAssociations plugin){
 		getalts = new getAlts(db);
 		associateplayer = new associatePlayer(db);
 		disassociatePlayer = new disAssociatePlayer(db);
 		utl = new Utility(plugin);
-		getPlayed = new getAmountPlayed(db);
+		helpManager = new HelpManager();
+		banCommand = new BanCommand(db);
 	}
 	
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (command.getName().equalsIgnoreCase("bagetalts"))
+		if (!command.getName().equalsIgnoreCase("ba")) return false;
+		
+		if (args.length == 0)
+			return helpManager.getCommandInfo(sender);
+		if (args[0].equalsIgnoreCase("alts"))
 			return getalts.getAltAccounts(sender, args);
-		if (command.getName().equalsIgnoreCase("baassociateplayer"))
+		if (args[0].equalsIgnoreCase("associate"))
 			return associateplayer.associateplayer(sender, args);
-		if (command.getName().equals("badisassociateplayer"))
+		if (args[0].equalsIgnoreCase("dassociate"))
 			return disassociatePlayer.disAssociate(sender, args);
-		if (command.getName().equals("betterassociations"))
-			return utl.run(sender, args);
-		if (command.getName().equals("bagetamountplayed"))
-			return getPlayed.getTimePlayed(sender, args);
+		if (args[0].equalsIgnoreCase("ban") && args[1].equalsIgnoreCase("player"))
+			return banCommand.banPlayer(sender, args);
 		return false;
 	}
 }

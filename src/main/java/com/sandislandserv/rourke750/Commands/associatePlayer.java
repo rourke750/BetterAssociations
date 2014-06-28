@@ -5,13 +5,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.sandislandserv.rourke750.database.AssociationsManager;
 import com.sandislandserv.rourke750.database.BaseValues;
 
 public class associatePlayer {
 
-	private BaseValues db;
+	private AssociationsManager am;
 	public associatePlayer(BaseValues db){
-		this.db = db;
+		am = db.getAssociationsManager();
 	}
 	
 	public boolean associateplayer(CommandSender sender, String[] args){
@@ -34,7 +35,7 @@ public class associatePlayer {
 				sender.sendMessage("Player: " + args[x] + " has never before therefore cannot be added.");
 				continue;
 			}
-			db.associatePlayer(args[0], args[x]);
+			am.associatePlayer(args[0], args[x]);
 		}
 		sender.sendMessage("All players have been added.");
 		return true;

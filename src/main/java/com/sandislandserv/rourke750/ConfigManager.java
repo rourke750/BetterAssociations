@@ -19,16 +19,12 @@ public class ConfigManager {
 		
 		if (!config.contains("secret")) config.set("secret", "");
 		
-		//if (!config.contains("send_data")) config.set("send_data", false);
+		if (!config.contains("banmanager.set.altlimitreason"))  config.set("banmanager.set.altlimitreason", "Too many associated accounts"
+				+ " logged on.\nPlease contact this server's administration.");
 		
-		//if (!config.contains("gui_options.username")) config.set("gui_options.username", "\n\r");
+		if (!config.contains("banmanager.set.altlimit")) config.set("banmanager.set.altlimit", 0);
 		
-		//if (!config.contains("gui_options.password")) config.set("gui_options.password", "\n\r");
-		
-		//if (!config.contains("gui_options.port")) config.set("gui_options.port", 0+"\n\r");
-		
-		//if (!config.contains("banmanager.set.altlimitreason"))  config.set("banmanager.set.altlimitreason", "\n\r");
-		
-		//if (!config.contains("banmanager.set.altlimit")) config.set("banmanager.set.altlimit", 0+"\n\r");
+		if (!config.contains("banmanager.set.defaultbanreason")) config.set("banmanager.set.defaultbanreason", "Please contact the admins"
+				+ " because you have been banned.");
 	}
 }

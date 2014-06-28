@@ -16,6 +16,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -23,6 +24,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import net.minecraft.util.com.mojang.authlib.GameProfile;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -88,12 +90,8 @@ public class SendInformation {
 			if (input.readLine().equals("AUTHENTICATED"))
 				authenticated = true;
 			socket.close();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Bukkit.getLogger().log(Level.INFO, "Could not connect to share.betterassociations.com");
 		}
 	}
 

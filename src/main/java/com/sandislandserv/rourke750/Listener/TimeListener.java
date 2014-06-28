@@ -14,15 +14,16 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.sandislandserv.rourke750.BetterAssociations;
 import com.sandislandserv.rourke750.database.BaseValues;
+import com.sandislandserv.rourke750.database.TimeManager;
 
-public class TimeManager implements Listener {
+public class TimeListener implements Listener {
 
 	private BetterAssociations plugin;
 	private static Map<String, Long> time = new HashMap<String, Long>();
-	private BaseValues db;
+	private TimeManager tm;
 
-	public TimeManager(BetterAssociations plugin, BaseValues db) {
-		this.db = db;
+	public TimeListener(BetterAssociations plugin, BaseValues db) {
+		tm = db.getTimeManager();
 		this.plugin = plugin;
 	}
 
@@ -35,7 +36,7 @@ public class TimeManager implements Listener {
 				String uuid = player.getUniqueId().toString();
 				long loginTime = System.currentTimeMillis() / 1000;
 				time.put(uuid, loginTime);
-				db.insertIntialPlayerTime(player);
+				tm.insertIntialPlayerTime(player);
 			}
 		});
 	}
@@ -62,7 +63,7 @@ public class TimeManager implements Listener {
 					return;
 				long logoutTime = System.currentTimeMillis() * 100;
 				long playerPlayedTime = logoutTime - time.get(uuid);
-				db.addTimetoPlayer(player, playerPlayedTime);
+				tm.addTimetoPlayer(player, playerPlayedTime);
 				time.remove(uuid);
 	}
 
@@ -74,7 +75,7 @@ public class TimeManager implements Listener {
 					String uuid = player.getUniqueId().toString();
 					long loginTime = System.currentTimeMillis() / 1000;
 					time.put(uuid, loginTime);
-					db.insertIntialPlayerTime(player);
+					tm.insertIntialPlayerTime(player);
 				}
 			});
 		}

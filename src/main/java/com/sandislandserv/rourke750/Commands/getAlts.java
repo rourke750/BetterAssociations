@@ -4,25 +4,25 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
+import com.sandislandserv.rourke750.database.AssociationsManager;
 import com.sandislandserv.rourke750.database.BaseValues;
 
 public class getAlts {
 
-	private BaseValues db;
-	
+	private AssociationsManager am;
 	public getAlts(BaseValues db){
-		this.db = db;
+		am = db.getAssociationsManager();
 	}
 	public boolean getAltAccounts(CommandSender sender, String[] args){
-		if (args.length > 1){ // only want to return one player's set of alts
+		if (args.length > 2){ // only want to return one player's set of alts
 			sender.sendMessage("Please only specify one account");
 			return true;
 		}
-		if (args.length == 0){
+		if (args.length == 1){
 			sender.sendMessage("Please specify a player's name, can't leave blank!");
 			return true;
 		}
-		List<String> alts = db.getAltsList(args[0]); // get tye alts for the player
+		List<String> alts = am.getAltsList(args[0]); // get the alts for the player
 		if (alts.size() == 0){
 			sender.sendMessage("Player has no alts.");
 			return true;
