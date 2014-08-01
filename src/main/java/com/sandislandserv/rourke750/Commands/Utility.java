@@ -12,9 +12,9 @@ public class Utility {
 		this.plugin = plugin;
 	}
 	
-	public boolean run(CommandSender sender, String[] args){
+	public void run(CommandSender sender, String[] args){
 		if (args[0].equals("reload")) plugin.reloadConfig();
 		sender.sendMessage(ChatColor.RED + "Config was reloaded!");
-		return true;
+		return;
 	}
 }

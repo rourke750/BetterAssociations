@@ -19,7 +19,6 @@ import com.sandislandserv.rourke750.database.TimeManager;
 public class TimeListener implements Listener {
 
 	private BetterAssociations plugin;
-	private static Map<String, Long> time = new HashMap<String, Long>();
 	private TimeManager tm;
 
 	public TimeListener(BetterAssociations plugin, BaseValues db) {
@@ -29,55 +28,16 @@ public class TimeListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void loginEvent(PlayerJoinEvent event) {
-		final Player player = event.getPlayer();
-		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-			@Override
-			public void run() {
-				String uuid = player.getUniqueId().toString();
-				long loginTime = System.currentTimeMillis() / 1000;
-				time.put(uuid, loginTime);
-				tm.insertIntialPlayerTime(player);
-			}
-		});
-	}
-
-	public long getTime(Player player) {
-		return time.get(player.getUniqueId().toString());
+		
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void logoutEvent(PlayerQuitEvent event) {
-		Player player = event.getPlayer();
-		save(player);
+		
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void playerKickEvent(PlayerKickEvent event) {
-		Player player = event.getPlayer();
-		save(player);
-	}
-
-	public void save(final Player player) {
-				String uuid = player.getUniqueId().toString();
-				if (!time.containsKey(uuid))
-					return;
-				long logoutTime = System.currentTimeMillis() * 100;
-				long playerPlayedTime = logoutTime - time.get(uuid);
-				tm.addTimetoPlayer(player, playerPlayedTime);
-				time.remove(uuid);
-	}
-
-	public void load() {
-		for (final Player player : Bukkit.getOnlinePlayers()) {
-			Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
-				@Override
-				public void run() {
-					String uuid = player.getUniqueId().toString();
-					long loginTime = System.currentTimeMillis() / 1000;
-					time.put(uuid, loginTime);
-					tm.insertIntialPlayerTime(player);
-				}
-			});
-		}
+		;
 	}
 }

@@ -1,6 +1,7 @@
 package com.sandislandserv.rourke750.Listener;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -33,7 +34,7 @@ public class BanListener implements Listener{
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST) // set to highest because this is most important
 	public void playerBanned(PlayerLoginEvent event){
-		String uuid = event.getPlayer().getUniqueId().toString();
+		UUID uuid = event.getPlayer().getUniqueId();
 		String reason = bm.isBanned(uuid);
 		if (reason.equals("")) return;
 		Player p = event.getPlayer();
@@ -46,15 +47,15 @@ public class BanListener implements Listener{
 	 */
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void tooManyLoggedInAccounts(PlayerLoginEvent event){ // Set to join because if kicked on login ip info isnt tracked.
-		String name = event.getPlayer().getName();
+		UUID name = event.getPlayer().getUniqueId();
 		int count = 0;
 		int allowed = plugin.getConfig().getInt("banmanager.set.altlimit");
 		if (allowed == 0) return;
-		List<String> alts = am.getAltsList(name);
-		Player[] oplayer = Bukkit.getOnlinePlayers();
-		for (Player p: oplayer){
-			if(alts.contains(p.getName())) count++;
-		}
+		List<UUID> alts = am.getAltsListUUID(name);
+		Player[] players = Bukkit.getOnlinePlayers();
+		for (Player p: players)
+			if(alts.contains(p.getUniqueId())) count++;
+		
 		if (count > allowed){
 			String reason = plugin.getConfig().getString("banmanager.set.altlimitreason");
 			event.setKickMessage(reason);

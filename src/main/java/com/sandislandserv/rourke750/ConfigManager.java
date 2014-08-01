@@ -17,7 +17,9 @@ public class ConfigManager {
 		
 		if (!config.contains("sql.password")) config.set("sql.password", "");
 		
-		if (!config.contains("secret")) config.set("secret", "");
+		if (!config.contains("secret.username")) config.set("secret.username", "");
+		
+		if (!config.contains("secret.secretkey")) config.set("secret.secretkey", "");
 		
 		if (!config.contains("banmanager.set.altlimitreason"))  config.set("banmanager.set.altlimitreason", "Too many associated accounts"
 				+ " logged on.\nPlease contact this server's administration.");

@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Properties;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,6 +23,7 @@ import com.sandislandserv.rourke750.Listener.BanListener;
 import com.sandislandserv.rourke750.Listener.LoginManager;
 import com.sandislandserv.rourke750.Listener.PrisonPearlListener;
 import com.sandislandserv.rourke750.Listener.TimeListener;
+import com.sandislandserv.rourke750.Misc.ClassHandler;
 import com.sandislandserv.rourke750.database.BaseValues;
 
 public class BetterAssociations extends JavaPlugin{
@@ -29,9 +32,9 @@ public class BetterAssociations extends JavaPlugin{
 	private LoginManager log;
 	private static BaseValues database;
 	private static FileConfiguration config;
-
+	private SendInformation si;
+	
 	public void onEnable() {
-		
 		try {
 			ExractFile(); // extract needed file
 		} catch (IOException e) {
@@ -44,21 +47,19 @@ public class BetterAssociations extends JavaPlugin{
 		con.initconfig(config);
 		saveConfig();
 		database = new BaseValues(this.getConfig(), this);
-		SendInformation si = new SendInformation(database, config);
-		log = new LoginManager(database, this, null); // replace null with si
-		time = new TimeListener(this, database);		
+		si = new SendInformation(this, database, config);
+		log = new LoginManager(database, this, si);
+		time = new TimeListener(this, database);
+		if (!ClassHandler.Initialize(getServer())){
+			Bukkit.getLogger().log(Level.SEVERE, "BetterAssociations has disabled itself, you are not running a "
+					+ "viable version of bukkit.");
+			Bukkit.getPluginManager().disablePlugin(this);
+		}
 		enableListener();
 		Command(); // Initiates the command class.
-		time.load(); // if someone reloads the server reinitiats all player times.
 	}
 
 	public void onDisable() {
-		saveAllPlayerTimes();
-	}
-
-	public void saveAllPlayerTimes() {
-		for (Player player : Bukkit.getOnlinePlayers())
-			time.save(player);
 	}
 
 	private void enableListener() {
@@ -72,7 +73,7 @@ public class BetterAssociations extends JavaPlugin{
 	}
 
 	public void Command() {
-		CommandManager com = new CommandManager(database, this);
+		CommandManager com = new CommandManager(database, this, si);
 		for (String command : getDescription().getCommands().keySet()) {
 			getCommand(command).setExecutor(com);
 		}
@@ -96,7 +97,6 @@ public class BetterAssociations extends JavaPlugin{
 			out.flush();
 			out.close();
 		}
-		System.setProperty("javax.net.ssl.trustStore", this.getDataFolder().toString() + File.separator+"myTrustStore"); // set cert
 	}
 	
 	public static FileConfiguration getConfigFile(){

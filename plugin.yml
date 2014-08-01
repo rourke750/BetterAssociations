@@ -1,52 +1,14 @@
 name: BetterAssociations
 main: com.sandislandserv.rourke750.BetterAssociations
-version: .5
+version: .6
 author: Rourke750
-depend: [ProtocolLib]
 softdepend: [PrisonPearl]
 commands:
-   bagetalts:
-      description: Get the alts of a player.
-      usage: /<command> <player>
-      permission: betterassociations.getalts
-   baassociateplayer:
-      description: Associates players with a main player.
-      usage: /<command> <player> <players>
-      permission: betterassociations.associateplayer
-   badisassociateplayer:
-      description: Disassociates a player from the main player.
-      usage: /<command> <player> <players>
-      permissions: betterassociations.disassociateplayer
-   betterassociations:
-      description: Main command for betterassociations
+   ba:
+      description: main command for Better Associations
       usage: /<command> <args>
-      permissions: betterassociations.betterassociation
-   bagetamountplayed:
-      description: Command to see how long a player has played for.
-      usage: /<command> <arg>
-      permissions: betterassociations.getamountplayed
+      permission: betterassociations.ba
 permissions:
-   betterassociations.getalts:
-      description: Gives access to the getalts command.
+   betterassociations.ba:
+      description: Gives access to the ba command.
       default: op
-   betterassociations.associateplayer:
-      description: Gives access to the associateplayer command.
-      default: op
-   betterassociations.disassociate:
-      description: Gives access to the disassociateplayer command.
-      default: op
-   betterassociations.betterassociation:
-      description: Gives access to the betterassociatons command.
-      default: op
-   betterassociations.getamountplayed:
-      description: Gives access to the getamountplayed command.
-      default: op
-   betterassociations.*:
-      description: Gives access to all BetterAssociation commands.
-      default: op
-      children:
-         betterassociations.getalts: true
-         betterassociations.associateplayer: true
-         betterassociations.disassociate: true
-         betterassociations.betterassociations: true
-         betterassociations.getamountplayed: true

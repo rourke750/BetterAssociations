@@ -1,6 +1,7 @@
 package com.sandislandserv.rourke750.Listener;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -20,9 +21,9 @@ public class PrisonPearlListener implements Listener{
 	
 	@EventHandler
 	public void updatePrisonPearlAltList(RequestAltsListEvent event){
-		List<String> players = event.getPlayersToCheck();
-		for (String name: players){ // loop through all the players
-			AltsListEvent altsList = new AltsListEvent(bv.getAssociationsManager().getAltsList(name));
+		List<UUID> uuids = event.getPlayersToCheck();
+		for (UUID uuid: uuids){ // loop through all the players
+			AltsListEvent altsList = new AltsListEvent(bv.getAssociationsManager().getAltsListUUID(uuid));
 			Bukkit.getServer().getPluginManager().callEvent(altsList);
 		}
 	}

@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
@@ -58,6 +59,20 @@ public class PlayerManager {
 		return -1; // failed
 	}
 	
+	public UUID getUUIDfromPlayerName(String name){
+		if (!db.isConnected()) db.reconnectAndSetPreparedStatements(); // reconnects database
+		try {
+			getUUIDfromPlayer.setString(1, name);
+			ResultSet set = getUUIDfromPlayer.executeQuery();
+			if(!set.next()) return null;
+			return UUID.fromString(set.getString("uuid"));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null; // failed
+	}
+	
 	public String getPlayer(int id) throws SQLException{
 		if (!db.isConnected()) db.reconnectAndSetPreparedStatements(); // reconnects database
 		getPlayerfromId.setInt(1, id);
@@ -66,22 +81,22 @@ public class PlayerManager {
 		return set.getString("player");
 	}
 	
-	public void addPlayerIp(String uuid, String ip){
+	public void addPlayerIp(UUID uuid, String ip){
 		if (!db.isConnected()) db.reconnectAndSetPreparedStatements(); // reconnects database
 		try {
 				addIp.setString(1, ip);
-				addIp.setString(2, uuid);
+				addIp.setString(2, uuid.toString());
 				addIp.execute();
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public boolean addPlayerUUID(String name, String uuid){
+	public boolean addPlayerUUID(String name, UUID uuid){
 		if (!db.isConnected()) db.reconnectAndSetPreparedStatements(); // reconnects database
 		try{
 			addPlayer.setString(1, name);
-			addPlayer.setString(2, uuid);
+			addPlayer.setString(2, uuid.toString());
 			addPlayer.execute();
 			return true;
 		}
@@ -120,10 +135,10 @@ public class PlayerManager {
 		return list;
 	}
 	
-	public String getPlayer(String uuid){
+	public String getPlayer(UUID uuid){
 		if (!db.isConnected()) db.reconnectAndSetPreparedStatements(); // reconnects database
 		try {
-			getPlayerfromUUID.setString(1, uuid);
+			getPlayerfromUUID.setString(1, uuid.toString());
 			ResultSet set = getPlayerfromUUID.executeQuery();
 			if (!set.next() || set == null) return null;
 			String player = set.getString("player");

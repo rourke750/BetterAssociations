@@ -116,17 +116,6 @@ public class BaseValues {
 		db.execute("CREATE TABLE IF NOT EXISTS `ban` (" +
 				"`id` int(10) NOT NULL," +
 				"`reason` varchar(40) NOT NULL);");
-		db.execute("CREATE TABLE IF NOT EXISTS `time` ("
-				+ "`id` int(10) NOT NULL,"
-				+ "`amount` bigint(10) DEFAULT 0,"
-				+ "PRIMARY KEY(`id`));");
-		db.execute("CREATE TABLE IF NOT EXISTS `play_times` (" +
-				"`id` int(10) NOT NULL," +
-				"`login` varchar(40) NOT NULL," +
-				"`logout` varchar(40) NOT NULL);");
-		db.execute("CREATE TABLE IF NOT EXISTS `notes` ("
-				+ "`id` int(10) NOT NULL,"
-				+ "`info` varchar(40) NOT NULL);");
 		db.execute("create table if not exists playercountnames ("
 				+ "player varchar(40) not null,"
 				+ "amount int(10) not null,"

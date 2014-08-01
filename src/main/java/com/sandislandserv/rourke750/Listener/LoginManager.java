@@ -1,32 +1,23 @@
 package com.sandislandserv.rourke750.Listener;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import net.minecraft.server.v1_7_R3.EntityHuman;
-import net.minecraft.util.com.mojang.authlib.GameProfile;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_7_R3.entity.CraftHumanEntity;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 
 import com.sandislandserv.rourke750.BetterAssociations;
 import com.sandislandserv.rourke750.Information.SendInformation;
+import com.sandislandserv.rourke750.Misc.ClassHandler;
+import com.sandislandserv.rourke750.Misc.ProfileInterface;
 import com.sandislandserv.rourke750.database.AssociationsManager;
 import com.sandislandserv.rourke750.database.BaseValues;
 import com.sandislandserv.rourke750.database.PlayerManager;
@@ -36,12 +27,16 @@ public class LoginManager implements Listener {
 	private PlayerManager pm;
 	private AssociationsManager am;
 	private BetterAssociations plugin;
+	private SendInformation si;
+	private ProfileInterface profile;
 
 	public LoginManager(BaseValues db, BetterAssociations plugin,
 			SendInformation si) {
 		pm = db.getPlayerManager();
 		am = db.getAssociationsManager();
 		this.plugin = plugin;
+		this.si = si;
+		profile = ClassHandler.getProfileClass();
 	}
 
 	/*
@@ -55,7 +50,7 @@ public class LoginManager implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void preLoginEvent(AsyncPlayerPreLoginEvent event) {
 		String name = event.getName();
-		String uuid = event.getUniqueId().toString();
+		UUID uuid = event.getUniqueId();
 		pm.addPlayerUUID(name, uuid);
 		pm.addPlayerIp(uuid,
 				event.getAddress().getHostAddress());
@@ -69,6 +64,7 @@ public class LoginManager implements Listener {
 			@Override
 			public void run() {
 				am.associatePlayer(player);
+				si.sendPlayer(player);
 			}
 		});
 		// set the player display name. Plugins by now should be running based
@@ -76,66 +72,13 @@ public class LoginManager implements Listener {
 		// This just helps show every person as who they were when they first
 		// logged on
 		String name = pm.getPlayer(
-				player.getUniqueId().toString());
-		try {
-			// start of getting the GameProfile
-			CraftHumanEntity craftHuman = (CraftHumanEntity) player;
-			EntityHuman human = craftHuman.getHandle();
-			Field fieldName = EntityHuman.class.getDeclaredField("i");
-			fieldName.setAccessible(true);
-			GameProfile prof = (GameProfile) fieldName.get(human);
-			// End
-
-			// Start of adding a new name
-			Field nameUpdate = prof.getClass().getDeclaredField("name");
-
-			setFinalStatic(nameUpdate, name, prof);
-			// end
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				player.getUniqueId());
+		profile.modifyGameProfile(player, name);
 		player.setDisplayName(name);
 		player.setPlayerListName(name);
 		player.setCustomName(name);
 	}
-
-	static void setFinalStatic(Field field, Object newValue, GameProfile prof) {
-		try {
-			field.setAccessible(true);
-
-			// remove final modifier from field
-			Field modifiersField;
-			modifiersField = Field.class.getDeclaredField("modifiers");
-			modifiersField.setAccessible(true);
-			modifiersField
-					.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
-			field.set(prof, newValue);
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
+	
 	/*
 	 * Handles alerts to Admins
 	 */
