@@ -22,17 +22,17 @@ public class ClassHandler {
 		}
 	}
 	
-	public static ProfileInterface getProfileClass(){
+	public ProfileInterface getProfileClass(){
 		return (ProfileInterface) getObject(ProfileInterface.class, "ProfileModifier");
 	}
 	
-	private static Object getObject(Class<? extends Object> Class, String name){
+	private Object getObject(Class<? extends Object> Class, String name){
 		try {
-			Class<?> internalClass = Class.forName("com.sandislandserv.rourke750.Misc." + ch.version + name);
+			Class<?> internalClass = Class.forName("com.sandislandserv.rourke750.Misc." + ch.version + "." + name);
 			if (internalClass.isAssignableFrom(internalClass)) 
 				return internalClass.getConstructor().newInstance();
 		} catch (Exception e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
 		}
 		return null;
 	}

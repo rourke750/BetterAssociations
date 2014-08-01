@@ -31,12 +31,12 @@ public class LoginManager implements Listener {
 	private ProfileInterface profile;
 
 	public LoginManager(BaseValues db, BetterAssociations plugin,
-			SendInformation si) {
+			SendInformation si, ProfileInterface prof) {
 		pm = db.getPlayerManager();
 		am = db.getAssociationsManager();
 		this.plugin = plugin;
 		this.si = si;
-		profile = ClassHandler.getProfileClass();
+		profile = prof;
 	}
 
 	/*

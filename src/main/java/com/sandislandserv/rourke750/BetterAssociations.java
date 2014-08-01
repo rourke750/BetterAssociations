@@ -24,6 +24,7 @@ import com.sandislandserv.rourke750.Listener.LoginManager;
 import com.sandislandserv.rourke750.Listener.PrisonPearlListener;
 import com.sandislandserv.rourke750.Listener.TimeListener;
 import com.sandislandserv.rourke750.Misc.ClassHandler;
+import com.sandislandserv.rourke750.Misc.ProfileInterface;
 import com.sandislandserv.rourke750.database.BaseValues;
 
 public class BetterAssociations extends JavaPlugin{
@@ -48,13 +49,15 @@ public class BetterAssociations extends JavaPlugin{
 		saveConfig();
 		database = new BaseValues(this.getConfig(), this);
 		si = new SendInformation(this, database, config);
-		log = new LoginManager(database, this, si);
-		time = new TimeListener(this, database);
 		if (!ClassHandler.Initialize(getServer())){
 			Bukkit.getLogger().log(Level.SEVERE, "BetterAssociations has disabled itself, you are not running a "
 					+ "viable version of bukkit.");
 			Bukkit.getPluginManager().disablePlugin(this);
 		}
+		ClassHandler handle = new ClassHandler();
+		ProfileInterface prof = handle.getProfileClass();
+		log = new LoginManager(database, this, si, prof);
+		time = new TimeListener(this, database);
 		enableListener();
 		Command(); // Initiates the command class.
 	}

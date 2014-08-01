@@ -62,6 +62,10 @@ public class CommandManager implements CommandExecutor{
 		
 		// Handles unbanning a player
 		else if(args[0].equalsIgnoreCase("unban")){
+			if (args.length <= 1)
+				sender.sendMessage(ChatColor.RED + "Please provide an argument such as \"player\" or \"all\".");
+			else if (!(args[1].equalsIgnoreCase("player") || args[1].equalsIgnoreCase("all")))
+				sender.sendMessage(ChatColor.RED + "That arg is not correct, please define either \"player\" or \"all\".");
 			
 		}
 		
