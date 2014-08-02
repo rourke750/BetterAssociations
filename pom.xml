@@ -12,6 +12,63 @@
     <name>BetterAssociations</name>
     <description>Bukkit Server Plugin</description>
     <inceptionYear>2014</inceptionYear>
+
+<executions>
+    <execution>
+        <id>copy-dependencies</id>
+        <phase>package</phase>
+        <goals>
+            <goal>copy-dependencies</goal>
+        </goals>
+        <configuration>
+            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            <overWriteReleases>false</overWriteReleases>
+            <overWriteSnapshots>false</overWriteSnapshots>
+            <overWriteIfNewer>true</overWriteIfNewer>
+            <includeScope>runtime</includeScope>
+        </configuration>
+    </execution>
+    <execution>
+        <id>copy-model</id>
+        <phase>package</phase>
+        <goals>
+            <goal>copy</goal>
+        </goals>
+        <configuration>
+            <artifactItems>
+                <artifactItem>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>craftbukkit</artifactId>
+                    <classifier>server</classifier>
+                    <version>1.7.9-R0.1-SNAPSHOT</version>
+                    <type>jar</type>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>craftbukkit</artifactId>
+                    <classifier>server</classifier>
+                    <version>1.7.9-R0.2-SNAPSHOT</version>
+                    <type>jar</type>
+                </artifactItem>
+		<artifactItem>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>craftbukkit</artifactId>
+                    <classifier>server</classifier>
+                    <version>1.7.9-R0.3-SNAPSHOT</version>
+                    <type>jar</type>
+                </artifactItem>
+		<artifactItem>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>craftbukkit</artifactId>
+                    <classifier>server</classifier>
+                    <version>1.7.10-R0.1-SNAPSHOT</version>
+                    <type>jar</type>
+                </artifactItem>
+            </artifactItems>
+            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+        </configuration>
+    </execution>
+</executions>
     <build>
     	<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
     	<plugins>
