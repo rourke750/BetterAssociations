@@ -6,13 +6,8 @@
 
     <groupId>com.sandislandserv.rourke750</groupId>
     <artifactId>BetterAssociations</artifactId>
-    <version>0.6</version>
+    <version>0.61</version>
     <packaging>jar</packaging>
-    
-    <name>BetterAssociations</name>
-    <description>Bukkit Server Plugin</description>
-    <inceptionYear>2014</inceptionYear>
-
 <executions>
     <execution>
         <id>copy-dependencies</id>
@@ -69,6 +64,10 @@
         </configuration>
     </execution>
 </executions>
+    
+    <name>BetterAssociations</name>
+    <description>Bukkit Server Plugin</description>
+    <inceptionYear>2014</inceptionYear>
     <build>
     	<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
     	<plugins>
