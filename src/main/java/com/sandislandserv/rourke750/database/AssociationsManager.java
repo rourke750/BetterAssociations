@@ -68,7 +68,7 @@ public class AssociationsManager {
 		getAlts = db.prepareStatement(String.format("SELECT p.player, p.uuid "
 				+ "FROM %s ass " + "inner join player p "
 				+ "on p.id = ass.alt_id " + "WHERE " + "ass.main_account_id=("
-				+ "SELECT pp.id FROM player pp WHERE pp.player=?" + ")"
+				+ "SELECT pp.id FROM player pp WHERE pp.uuid=?" + ")"
 				+ " AND ass.valid=1 " + "order by p.player asc ",
 				"associations"));
 		getAmountOfAlts = db.prepareStatement(String.format(

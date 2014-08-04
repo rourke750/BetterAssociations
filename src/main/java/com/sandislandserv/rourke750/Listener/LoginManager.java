@@ -48,16 +48,16 @@ public class LoginManager implements Listener {
 	 * Also adds the ip
 	 */
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void preLoginEvent(AsyncPlayerPreLoginEvent event) {
-		String name = event.getName();
-		UUID uuid = event.getUniqueId();
+	public void lowLoginEvent(PlayerJoinEvent event) {
+		String name = event.getPlayer().getName();
+		UUID uuid = event.getPlayer().getUniqueId();
 		pm.addPlayerUUID(name, uuid);
 		pm.addPlayerIp(uuid,
-				event.getAddress().getHostAddress());
+				event.getPlayer().getAddress().getAddress().getHostAddress());
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void loginEvent(PlayerLoginEvent event) {
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void loginEvent(PlayerJoinEvent event) {
 		// associates the player
 		final Player player = event.getPlayer();
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
